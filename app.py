@@ -39,11 +39,11 @@ okta_idp = {
 keycloak_idp = {
     'CLASS': 'flask_saml2.sp.idphandler.IdPHandler',
     'OPTIONS': {
-        'display_name': 'Keycloak',
-        'entity_id': 'http://localhost:8080/realms/example-realm',
-        'sso_url': 'http://localhost:8080/realms/example-realm/protocol/saml',
-        'slo_url': 'http://localhost:8080/realms/example-realm/protocol/saml',
-        'certificate': certificate_from_file('cert2.pem')
+        'display_name': 'Auth0',
+        'entity_id': 'urn:dev-ybjxz6a8.us.auth0.com',
+        'sso_url': 'https://dev-ybjxz6a8.us.auth0.com/samlp/NQj4fH9Gmu9lMaiu5FU3foV9XXDWjJ8Z',
+        'slo_url': 'https://dev-ybjxz6a8.us.auth0.com/samlp/NQj4fH9Gmu9lMaiu5FU3foV9XXDWjJ8Z',
+        'certificate': certificate_from_file('dev-ybjxz6a8.cert')
     }
 }
 

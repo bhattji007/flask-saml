@@ -62,15 +62,15 @@ def index():
 def add_idp():
     try:
         data = request.form
-        pem_certificate = convert_cert_to_pem(data['certificate'])
+        # pem_certificate = convert_cert_to_pem(data['certificate'])
         new_idp = {
-            'CLASS': 'flask_saml2.sp.idphandler.IdPHandler',
+            'CLASS': 'flask_saml2.sp.idphandler.IdPHandler',    
             'OPTIONS': {
                 'display_name': data['display_name'],
                 'entity_id': data['entity_id'],
                 'sso_url': data['sso_url'],
                 'slo_url': data['slo_url'],
-                'certificate': certificate_from_string(pem_certificate)
+                'certificate': certificate_from_string(data['certificate'])
             }
         }
 
