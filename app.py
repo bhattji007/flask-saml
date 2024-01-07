@@ -16,7 +16,7 @@ sp = ExampleServiceProvider()
 app = Flask(__name__)
 app.debug = True
 app.secret_key = 'not a secret'
-app.config['SERVER_NAME'] = 'localhost:8082'     
+app.config['SERVER_NAME'] = 'ec2-23-21-27-197.compute-1.amazonaws.com:8082'     
 app.config['SAML2_SP'] = {
     'certificate': certificate_from_file('cert1.pem'),
     'private_key': private_key_from_file('key1.pem'),
