@@ -86,7 +86,7 @@ app.register_blueprint(sp.create_blueprint(), url_prefix='/saml/')
 
 # Run the app
 if __name__ == '__main__':
-    app.run(port=8082)
+    app.run(host='0.0.0.0', port=5000)
 
 
 # http://localhost:8082/saml/login/idp/?entity_id=http://www.okta.com/exkgkdspz4AU2NF3q4x7&next=http://localhost:8082/
