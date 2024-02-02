@@ -9,19 +9,17 @@ class ExampleServiceProvider(ServiceProvider):
     def get_default_login_return_url(self):
         return url_for('index', _external=True)
 
-    def get_idp_login_url(self, idp_name):
-        return url_for('flask_saml2_sp.login', idp=idp_name, _external=True)
+    
 
 sp = ExampleServiceProvider()
 app = Flask(__name__)
 app.debug = True
 app.secret_key = 'not a secret'
-app.config['SERVER_NAME'] = 'ec2-23-21-27-197.compute-1.amazonaws.com:8082'     
+app.config['SERVER_NAME'] = '127.0.0.1:8082'  # Change to your desired server name
 app.config['SAML2_SP'] = {
     'certificate': certificate_from_file('cert1.pem'),
     'private_key': private_key_from_file('key1.pem'),
 }
-
 
 # Okta Identity Provider
 okta_idp = {
@@ -29,9 +27,9 @@ okta_idp = {
     'OPTIONS': {
         'display_name': 'Okta',
         'entity_id': 'http://www.okta.com/exkgkdspz4AU2NF3q4x7',
-            'sso_url': 'https://dev-348625.okta.com/app/dev-348625_devapp_1/exkgkdspz4AU2NF3q4x7/sso/saml',
-            'slo_url': 'https://dev-348625.okta.com/app/dev-348625_devapp_1/exkgkdspz4AU2NF3q4x7/sso/saml',
-            'certificate': certificate_from_file('cert.cert')
+        'sso_url': 'https://dev-348625.okta.com/app/dev-348625_devapp_1/exkgkdspz4AU2NF3q4x7/sso/saml',
+        'slo_url': 'https://dev-348625.okta.com/app/dev-348625_devapp_1/exkgkdspz4AU2NF3q4x7/sso/saml',
+        'certificate': certificate_from_file('cert.cert')
     }
 }
 
@@ -70,27 +68,23 @@ def index():
     else:
         message = '<p>You are logged out.</p>'
 
-        # Generate login links for each IdP
+        # Generate final login links for each IdP
         login_links = '<p>Login links:</p>'
         for idp in app.config['SAML2_IDENTITY_PROVIDERS']:
-            login_url = sp.get_idp_login_url(idp['OPTIONS']['display_name'].lower())
-            login_links += f'<p><a href="{login_url}">Log in with {idp["OPTIONS"]["display_name"]}</a></p>'
+            entity_id = idp['OPTIONS']['entity_id']
+            next_url = url_for('index', _external=True)
+            login_url = url_for('flask_saml2_sp.login', _external=True)
+            final_login_url = f'<p><a href="{login_url}/idp?entity_id={entity_id}&next={next_url}">Log in with {idp["OPTIONS"]["display_name"]}</a></p>'
+            login_links += final_login_url
+            print("LOGIN URL-",login_links)
+
 
         return message + login_links
 
 # Blueprint
 app.register_blueprint(sp.create_blueprint(), url_prefix='/saml/')
 
-# Print metadata URL
-# print(sp.get_metadata_url())
-
 # Run the app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8082)
-
-
-# http://localhost:8082/saml/login/idp/?entity_id=http://www.okta.com/exkgkdspz4AU2NF3q4x7&next=http://localhost:8082/
-
-
-
-# http://localhost:8082/saml/login/idp/?entity_id=http://localhost:8080/realms/example-realm&next=http://localhost:8082/
+# http://127.0.0.1:8082/saml/login/idp/?entity_id=http://www.okta.com/exkgkdspz4AU2NF3q4x7&next=http://127.0.0.1:8082/
