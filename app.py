@@ -1,6 +1,10 @@
-from flask import Flask, url_for
+from flask import Flask, url_for, request, redirect, jsonify
 from flask_saml2.sp import ServiceProvider
+from flask_saml2.utils import certificate_from_string
 from flask_saml2.utils import certificate_from_file, private_key_from_file
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+
 
 class ExampleServiceProvider(ServiceProvider):
     def get_logout_return_url(self):
@@ -45,7 +49,7 @@ keycloak_idp = {
     }
 }
 
-app.config['SAML2_IDENTITY_PROVIDERS'] = [okta_idp, keycloak_idp]
+app.config['SAML2_IDENTITY_PROVIDERS'] = [keycloak_idp]
 
 # index route
 @app.route('/')
@@ -80,6 +84,33 @@ def index():
 
 
         return message + login_links
+
+
+@app.route('/add_idp', methods=['POST'])
+def add_idp():
+    try:
+        data = request.form
+        # pem_certificate = convert_cert_to_pem(data['certificate'])
+        new_idp = {
+            'CLASS': 'flask_saml2.sp.idphandler.IdPHandler',    
+            'OPTIONS': {
+                'display_name': data['display_name'],
+                'entity_id': data['entity_id'],
+                'sso_url': data['sso_url'],
+                'slo_url': data['slo_url'],
+                'certificate': certificate_from_file('cert.cert')
+            }
+        }
+
+        app.config['SAML2_IDENTITY_PROVIDERS'].append(new_idp)
+        print(app.config['SAML2_IDENTITY_PROVIDERS'])
+
+        # Optionally, you can return a JSON response
+        return jsonify({'message': 'IdP added successfully'}), 200
+    except Exception as e:
+        # Handle errors and return an appropriate response
+        return jsonify({'error': str(e)}), 400
+
 
 # Blueprint
 app.register_blueprint(sp.create_blueprint(), url_prefix='/saml/')
